@@ -1,0 +1,33 @@
+#!/bin/sh
+
+updatechart() {
+    echo "  updating ${chart}..."
+    helm pull ${chart} -d ./charts-stage --untar
+    return $?
+}
+
+update() {
+    for chart in $(cat ./charts.txt); do
+        updatechart ${chart}
+    done
+    git status | grep -q ./charts-stage
+    return $?
+}
+
+package() {
+    for chart in ./charts-stage/* ; do
+        cd ${chart}
+        updates=../../charts-updates/${chart}
+        if [[ -f ${updates}/values.yaml ]]; then
+            echo "  merging values.yaml files"
+            yq m ${updates}/values.yaml ./values.yaml > newvalues.yaml
+            mv -f newvalues.yaml values.yaml
+        if [[ -d ${updates}/templates ]]; then
+            echo "  adding templates"
+            cp ${updates}/templates/* templates/
+        fi
+        helm package . -d ../../charts/
+    done
+}
+
+${@}
