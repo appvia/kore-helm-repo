@@ -45,6 +45,7 @@ helm-update:
 helm-package:
 	@echo "--> Packaging the charts"
 	@./hack/bin/charts package
+	@./hack/bin/charts createrepo
 
 build: clean golang build-web-static helm-update helm-package
 	@echo "--> Building Kore Helm Repo"

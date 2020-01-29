@@ -55,8 +55,12 @@ package() {
             return 1
         fi
         helm package . -d ../../charts/
-        return $?
     done
+    return $?
+}
+
+createrepo() {
+    helm repo index ./charts
 }
 
 ${@}
