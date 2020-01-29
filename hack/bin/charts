@@ -16,8 +16,17 @@ updatechart() {
 }
 
 update() {
+    cat ./repos.txt | while read line ; do
+        echo ${line} | egrep -q '^#' &>/dev/null && continue
+        repoAlias=$(echo ${line} | cut -d= -f1)
+        repoUrl=$(echo ${line} | cut -d= -f2)
+        if ! helm repo ls 2>/dev/null | egrep -q '^'${repoAlias}'\t'${repoUrl}'' &>/dev/null ; then
+            echo "    adding repo ${repoAlias} at ${repoUrl}"
+            helm repo add ${repoAlias} ${repoUrl}
+        fi
+    done
     cat ./charts.txt | while read line ; do
-        [[ ${line} = \#* ]] &>/dev/null && continue
+        echo ${line} | egrep -q '^#' &>/dev/null && continue
         chart=$(echo ${line} | cut -d: -f1)
         version=$(echo ${line} | cut -d: -f2)
         updatechart ${chart} ${version}
@@ -41,7 +50,7 @@ package() {
             cp ${updates}/templates/* templates/
         fi
         # Ensure we have at least one Application defined:
-        if ! grep -R 'kind: Application' templates/ ; then
+        if ! grep -r 'kind: Application' templates/ ; then
             echo "ERROR no 'Application' resource defined"
             return 1
         fi

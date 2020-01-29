@@ -1,0 +1,2 @@
+# Use alias=repo_url
+stable=https://kubernetes-charts.storage.googleapis.com/
