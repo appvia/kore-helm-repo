@@ -1,0 +1,20 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "kore-node-metrics"
+  labels:
+    kore: "cluster-app"
+spec:
+  selector:
+    matchLabels:
+      chart: prometheus-node-exporter-1.8.1
+  componentKinds:
+    - group: node-exporter
+      kind: Service
+    - group: node-exporter
+      kind: Daemonset
+  assemblyPhase: "Pending"
+  descriptor:
+    version: "0.18.1"
+    description: "Export metrics from node resource utilisation"
+    type: "node-exporter"

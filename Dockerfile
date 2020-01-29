@@ -4,6 +4,7 @@ RUN curl -sSL https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_a
     chmod +x /usr/bin/yq
 WORKDIR /app
 COPY . .
+RUN make helm-update
 RUN make helm-package
 
 FROM golang:1.12.7 as server

@@ -1,0 +1,28 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "kore-prometheus"
+  labels:
+    kore: "cluster-app"
+spec:
+  selector:
+    matchLabels:
+      chart: prometheus-operator-8.5.10
+  componentKinds:
+    - group: alert-manager
+      kind: StatefulSet
+    - group: alert-manager
+      kind: Service
+    - group: prometheus
+      kind: StatefulSet
+    - group: prometheus
+      kind: Service
+    - group: operator
+      kind: Deployment
+    - group: operator
+      kind: Service
+  assemblyPhase: "Pending"
+  descriptor:
+    version: "1.8.1"
+    description: "Provides metrics gathering and storage for clusters and components"
+    type: "prometheus"

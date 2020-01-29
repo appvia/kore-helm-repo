@@ -1,1 +1,2 @@
-stable/prometheus-operator
+# use chart:version
+stable/prometheus-operator:8.5.10

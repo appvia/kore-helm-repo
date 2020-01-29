@@ -1,32 +1,52 @@
 #!/bin/sh
 
 updatechart() {
-    echo "  updating ${chart}..."
-    helm pull ${chart} -d ./charts-stage --untar
+    chart=$1
+    version=$2
+    chartName=$(basename ${chart})
+    echo "    updating ${chart} at ${version}..."
+    if [ ${version} != '' ]; then
+      versionFlag="--version ${version}"
+    fi
+    helm pull ${chart} -d ./charts-stage --untar ${versionFlag}
+    rm -fr ./charts-stage/${chartName}-${version}
+    # Support a single chart at multiple different versions
+    mv ./charts-stage/${chartName} ./charts-stage/${chartName}-${version}
     return $?
 }
 
 update() {
-    for chart in $(cat ./charts.txt); do
-        updatechart ${chart}
+    cat ./charts.txt | while read line ; do
+        [[ ${line} = \#* ]] &>/dev/null && continue
+        chart=$(echo ${line} | cut -d: -f1)
+        version=$(echo ${line} | cut -d: -f2)
+        updatechart ${chart} ${version}
     done
-    git status | grep -q ./charts-stage
     return $?
 }
 
 package() {
-    for chart in ./charts-stage/* ; do
-        cd ${chart}
+    for chartFolder in ./charts-stage/* ; do
+        cd ${chartFolder}
+        chart=$(basename ${chartFolder})
         updates=../../charts-updates/${chart}
-        if [[ -f ${updates}/values.yaml ]]; then
-            echo "  merging values.yaml files"
-            yq m ${updates}/values.yaml ./values.yaml > newvalues.yaml
+        if [ -f ${updates}/values.yaml ]; then
+            echo "    merging values.yaml files"
+            # TODO: test this merge is fuctionaly what's required?!
+            yq m -x ${updates}/values.yaml ./values.yaml > newvalues.yaml
             mv -f newvalues.yaml values.yaml
-        if [[ -d ${updates}/templates ]]; then
-            echo "  adding templates"
+        fi
+        if [ -d ${updates}/templates ]; then
+            echo "    adding templates"
             cp ${updates}/templates/* templates/
         fi
+        # Ensure we have at least one Application defined:
+        if ! grep -R 'kind: Application' templates/ ; then
+            echo "ERROR no 'Application' resource defined"
+            return 1
+        fi
         helm package . -d ../../charts/
+        return $?
     done
 }
 

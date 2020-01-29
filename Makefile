@@ -16,13 +16,17 @@ PACKAGES=$(shell go list ./...)
 REGISTRY=quay.io
 ROOT_DIR=${PWD}
 
-.PHONY: golang build-web build-web-static helm-update helm-compile 
+.PHONY: clean golang build-web build-web-static helm-update helm-package
 
 default: build
 
 golang:
 	@echo "--> Go Version"
 	@go version
+
+clean:
+	@echo "--> Cleaning"
+	@rm -fr ./charts/* ./charts-stage/* ./bin/*
 
 build-web: golang
 	@echo "--> Compiling the project"
@@ -42,9 +46,9 @@ helm-package:
 	@echo "--> Packaging the charts"
 	@./hack/bin/charts package
 
-build: build-web-static helm-compile
+build: clean golang build-web-static helm-update helm-package
 	@echo "--> Building Kore Helm Repo"
 
-docker:
+docker: clean
 	@echo "--> Building the docker image"
 	docker build -t ${REGISTRY}/${AUTHOR}/${NAME}:${VERSION} .

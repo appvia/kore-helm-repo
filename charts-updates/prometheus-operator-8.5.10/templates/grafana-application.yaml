@@ -1,0 +1,20 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "kore-grafana"
+  labels:
+    kore: "cluster-app"
+spec:
+  selector:
+    matchLabels:
+      chart: grafana-4.3.0
+  componentKinds:
+    - group: grafana
+      kind: Service
+    - group: grafana
+      kind: Deployment
+  assemblyPhase: "Pending"
+  descriptor:
+    version: "6.5.2"
+    description: "A graphical display for metrics systems"
+    type: "grafana"

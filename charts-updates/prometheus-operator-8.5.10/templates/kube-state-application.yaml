@@ -1,0 +1,20 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "kube-state-metrics"
+  labels:
+    kore: "cluster-app"
+spec:
+  selector:
+    matchLabels:
+      helm.sh/chart: kube-state-metrics-2.6.1
+  componentKinds:
+    - group: kube-state
+      kind: Service
+    - group: kube-state
+      kind: Deployment
+  assemblyPhase: "Pending"
+  descriptor:
+    version: "0.18.1"
+    description: "Export metrics from Kubernetes"
+    type: "kubernetes-exporter"
