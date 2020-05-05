@@ -1,0 +1,20 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "kore-ingress"
+  labels:
+    kore: "cluster-app"
+spec:
+  selector:
+    matchLabels:
+      chart: nginx-ingress-1.36.3
+  componentKinds:
+    - group: core
+      kind: Service
+    - group: apps
+      kind: Deployment
+  assemblyPhase: "Pending"
+  descriptor:
+    version: "1.36.3"
+    description: "nginx"
+    type: "nginx"

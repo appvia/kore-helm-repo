@@ -6,9 +6,9 @@ GIT_SHA=$(shell git --no-pager describe --always --dirty)
 REGISTRY=quay.io
 ROOT_DIR=${PWD}
 # TODO git tag or dirty
-VERSION ?= v0.0.1
-KUBE_NAMESPACE ?= kore-helm
-SERVICE ?= ${KUBE_NAMESPACE}.svc.cluster.local
+VERSION ?= v0.0.4
+KUBE_NAMESPACE ?= kore
+SERVICE ?= ${NAME}.${KUBE_NAMESPACE}.svc.cluster.local
 GOVERSION ?= 1.12.7
 HARDWARE=$(shell uname -m)
 LFLAGS ?= -X main.gitsha=${GIT_SHA} -X main.compiled=${BUILD_TIME}
@@ -45,9 +45,9 @@ helm-update:
 helm-package:
 	@echo "--> Packaging the charts"
 	@./hack/bin/charts package
-	@./hack/bin/charts createrepo
+	@./hack/bin/charts createrepo http://${SERVICE}:3000/charts/
 
-build: clean golang build-web-static helm-update helm-package
+build: clean helm-update helm-package golang build-web-static
 	@echo "--> Building Kore Helm Repo"
 
 docker: clean

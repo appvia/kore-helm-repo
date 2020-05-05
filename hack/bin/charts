@@ -1,5 +1,15 @@
 #!/bin/sh
 
+abort()
+{
+    echo "An error occurred. Exiting..." >&2
+    exit 1
+}
+
+trap 'abort' 0
+
+set -e
+
 updatechart() {
     chart=$1
     version=$2
@@ -36,15 +46,10 @@ update() {
 
 package() {
     for chartFolder in ./charts-stage/* ; do
-        cd ${chartFolder}
+        (
+        cd "${chartFolder}"
         chart=$(basename ${chartFolder})
         updates=../../charts-updates/${chart}
-        if [ -f ${updates}/values.yaml ]; then
-            echo "    merging values.yaml files"
-            # TODO: test this merge is fuctionaly what's required?!
-            yq m -x ${updates}/values.yaml ./values.yaml > newvalues.yaml
-            mv -f newvalues.yaml values.yaml
-        fi
         if [ -d ${updates}/templates ]; then
             echo "    adding templates"
             cp ${updates}/templates/* templates/
@@ -55,12 +60,16 @@ package() {
             return 1
         fi
         helm package . -d ../../charts/
+        )
+        echo "$?"
     done
     return $?
 }
 
 createrepo() {
-    helm repo index ./charts
+    url=$1
+    helm repo index ./charts --url ${url}
 }
 
 ${@}
+trap : 0
