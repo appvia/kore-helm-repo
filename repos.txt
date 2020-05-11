@@ -1,2 +1,3 @@
 # Use alias=repo_url
 stable=https://kubernetes-charts.storage.googleapis.com/
+aws-sb=https://awsservicebroker.s3.amazonaws.com/charts
